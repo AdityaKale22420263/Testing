@@ -4,7 +4,59 @@ Use this as your talking-point guide. Read through it, internalise the reasoning
 
 ---
 
-## 1. ARCHITECTURE (≈ 3 min)
+## 0. THE PROBLEM & THE SOLUTION (≈ 2 min)
+
+### The Problem
+
+> "Every engineering team makes dozens of technical decisions — which database to use, how to structure the API, when to refactor. But these decisions live in Slack threads, meeting notes, or just someone's head. Six months later, nobody remembers *why* we chose Postgres over MongoDB, or *who* approved the decision, or *what alternatives we considered*. New team members join and re-fight the same battles because there's no record."
+
+**Pain points to mention:**
+- Decisions get lost in chat history and scattered docs
+- No clear lifecycle — is it just an idea, or did the team actually commit?
+- No accountability — who decided, when, and why?
+- No traceability — if a decision turns out wrong, there's no link to what replaced it
+- Re-visiting old debates wastes time because there's no record of what was already evaluated
+
+### The Solution: Decisio
+
+> "Decisio is a decision tracking platform that gives every technical decision a structured lifecycle, a permanent record, and a complete audit trail."
+
+**Key points:**
+- Every decision has a **status lifecycle**: Draft → Proposed → Decided → Superseded
+- Each decision records the **problem context**, the **options considered** (with pros/cons), and the **final outcome**
+- Once decided, the record is **immutable** — you can't silently rewrite history
+- If a decision needs to change, you **supersede** it — a new decision replaces the old one with a clear link back
+- Every action is **audited** — who did what, when, and why
+- Decisions are **tagged** and organised by **project** for easy search
+
+### Real-Life Use Case: Bob & The API Gateway Decision
+
+> "Let me walk you through how this would actually be used."
+
+1. **Bob is a backend engineer** on the Platform Team. The team needs to decide whether to use an API gateway or keep direct service-to-service calls.
+
+2. **Bob creates a new decision** in Decisio under the "Platform Infrastructure" project. He writes the context: *"Our microservices currently call each other directly. As we scale to 15+ services, we're seeing retry storms and inconsistent auth checks."*
+
+3. **Bob adds three options:**
+   - **Option A: Kong API Gateway** — Pros: mature, plugin ecosystem. Cons: operational overhead, new infra.
+   - **Option B: AWS API Gateway** — Pros: managed service, no ops. Cons: vendor lock-in, cold starts.
+   - **Option C: Keep direct calls** — Pros: no change needed. Cons: problems will get worse.
+
+4. **Bob tags the decision** with `infrastructure`, `api-design`, and `scalability`, then **transitions it to Proposed** — the team can now review it.
+
+5. **In the next team meeting**, they discuss. Alice and Carol review the options in Decisio. They agree on Kong. The lead **transitions the decision to Decided** and marks Option A as chosen, with a final summary: *"Going with Kong for centralized auth, rate limiting, and retry policies."*
+
+6. **The decision is now frozen.** Nobody can silently edit it. The audit trail shows who proposed it, when it was decided, and who approved it.
+
+7. **Three months later**, the team realises Kong's operational overhead is too high. Instead of editing the old decision, David **creates a new decision that supersedes it**: *"Migrating from Kong to AWS API Gateway — the ops burden of self-hosted Kong isn't justified at our scale."* The old decision is automatically marked Superseded with a pointer to the new one.
+
+8. **A year later, a new hire** joins and wonders "why are we on AWS API Gateway?" They search Decisio, find the current decision, click through to the superseded one, and read the full history — problem, options, reasoning, and what changed. **No Slack archaeology needed.**
+
+> "That's the core workflow. Let me show you how I built it."
+
+---
+
+## 1. ARCHITECTURE (≈ 2.5 min)
 
 ### High-Level
 - **Three-tier architecture**: React frontend → Flask REST API → PostgreSQL database
